@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.inf012.inventory.dto.categoria.CategoriaDto;
 import com.inf012.inventory.dto.categoria.CategoriaResponseDto;
 import com.inf012.inventory.dto.categoria.CategoriaUpdateDto;
-import com.inf012.inventory.mapper.CategoriaMapper;
-import com.inf012.inventory.model.Categoria;
 import com.inf012.inventory.service.CategoriaService;
 
 import jakarta.validation.Valid;
@@ -27,11 +25,9 @@ import jakarta.validation.Valid;
 public class CategoriaController {
 
     private final CategoriaService categoriaService;
-    private final CategoriaMapper mapper;
 
-    public CategoriaController(CategoriaService categoriaService, CategoriaMapper mapper) {
+    public CategoriaController(CategoriaService categoriaService) {
         this.categoriaService = categoriaService;
-        this.mapper = mapper;
     }
 
     @GetMapping
