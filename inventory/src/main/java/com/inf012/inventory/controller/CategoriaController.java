@@ -46,8 +46,7 @@ public class CategoriaController {
 
     @PostMapping
     public ResponseEntity<CategoriaResponseDto> cadastrar(@RequestBody @Valid CategoriaDto categoria) {
-        Categoria novaCategoria = categoriaService.cadastrar(mapper.toEntity(categoria));
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.fromEntity(novaCategoria));
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.cadastrar(categoria));
     }
 
     @PutMapping("/{idCategoria}")
