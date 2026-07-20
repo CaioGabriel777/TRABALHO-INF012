@@ -2,10 +2,14 @@ package com.inf012.inventory.service;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.inf012.inventory.dto.ProdutoDto;
-import com.inf012.inventory.dto.ProdutoResponseDto;
+import com.inf012.inventory.dto.produto.ProdutoDto;
+import com.inf012.inventory.dto.produto.ProdutoResponseDto;
+import com.inf012.inventory.dto.produto.ProdutoUpdateDto;
+import com.inf012.inventory.exception.BusinessException;
+import com.inf012.inventory.exception.ResourceNotFoundException;
 import com.inf012.inventory.mapper.ProdutoMapper;
 import com.inf012.inventory.model.Categoria;
 import com.inf012.inventory.model.Fornecedor;
@@ -39,7 +43,7 @@ public class ProdutoService {
         List<Produto> produtos = produtoRepository.findAll();
 
         if (produtos.isEmpty()) {
-            throw new RuntimeException("Nenhum produto encontrado");
+            throw new ResourceNotFoundException("Nenhum produto encontrado");
         }
 
         return produtos.stream()
@@ -50,11 +54,11 @@ public class ProdutoService {
     @Transactional
     public ProdutoResponseDto buscarPorId(Long produtoId) {
         if (produtoId == null || produtoId <= 0) {
-            throw new RuntimeException("Id inválido");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Id inválido");
         }
 
         Produto produto = produtoRepository.findById(produtoId)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
 
         return mapper.fromEntity(produto);
     }
@@ -63,10 +67,10 @@ public class ProdutoService {
     @Transactional
     public ProdutoResponseDto cadastrarProduto(ProdutoDto produto) {
         Categoria categoria = categoriaRepository.findById(produto.categoriaId())
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));
 
         Fornecedor fornecedor = fornecedorRepository.findById(produto.fornecedorId())
-                .orElseThrow(() -> new RuntimeException("Fornecedor não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Fornecedor não encontrado"));
 
         Produto newProduto = mapper.dtoToProduto(produto);
         newProduto.setCategoria(categoria);
@@ -78,14 +82,57 @@ public class ProdutoService {
 
     // adicionar notificação
     @Transactional
-    public void removerProduto(Long produtoId) {
-        if (produtoId == null || produtoId <= 0) {
-            throw new RuntimeException("Id inválido");
+    public ProdutoResponseDto atualizarProdutor(Long idProduto, ProdutoUpdateDto produto) {
+
+        Produto produtoExistente = produtoRepository.findById(idProduto)
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+
+        if (produto.nome() != null) {
+            produtoExistente.setNome(produto.nome());
         }
 
-        Produto produto = produtoRepository.findById(produtoId)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+        if (produto.descricao() != null) {
+            produtoExistente.setDescricao(produto.descricao());
+        }
 
-        produtoRepository.delete(produto);
+        if (produto.preco() != null) {
+            produtoExistente.setPreco(produto.preco());
+        }
+
+        if (produto.quantidadeEstoque() != null) {
+            produtoExistente.setQuantidadeEstoque(produto.quantidadeEstoque());
+        }
+
+        if (produto.estoqueMinimo() != null) {
+            produtoExistente.setEstoqueMinimo(produto.estoqueMinimo());
+        }
+
+        if (produto.categoriaId() != null) {
+            Categoria categoria = categoriaRepository.findById(produto.categoriaId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Categoria inválida"));
+            produtoExistente.setCategoria(categoria);
+        }
+
+        if (produto.fornecedorId() != null) {
+            Fornecedor fornecedor = fornecedorRepository.findById(produto.fornecedorId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Fornecedor não encontrado"));
+            produtoExistente.setFornecedor(fornecedor);
+        }
+
+        if (produto.ativo() != null) {
+            produtoExistente.setAtivo(produto.ativo());
+        }
+
+        return mapper.fromEntity(produtoRepository.save(produtoExistente));
+    }
+
+    // adicionar notificação
+    @Transactional
+    public void removerProduto(Long idProduto) {
+        if (!produtoRepository.existsById(idProduto)) {
+            throw new ResourceNotFoundException("Produto não encontrado: " + idProduto);
+        }
+
+        produtoRepository.deleteById(idProduto);
     }
 }

@@ -2,8 +2,8 @@ package com.inf012.inventory.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.inf012.inventory.dto.ProdutoDto;
-import com.inf012.inventory.dto.ProdutoResponseDto;
+import com.inf012.inventory.dto.produto.ProdutoDto;
+import com.inf012.inventory.dto.produto.ProdutoResponseDto;
 import com.inf012.inventory.model.Produto;
 
 @Component
@@ -28,8 +28,8 @@ public record ProdutoMapper() {
                 produto.getPreco(),
                 produto.getQuantidadeEstoque(),
                 produto.getCategoria().getNome(),
+                produto.getAtivo(),
                 produto.getDataCriacao(),
-                produto.getDataAtualizacao(),
-                produto.getAtivo());
+                produto.getDataAtualizacao());
     }
 }

@@ -1,4 +1,4 @@
-package com.inf012.inventory.dto;
+package com.inf012.inventory.dto.produto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,7 +10,7 @@ public record ProdutoResponseDto(
                 BigDecimal preco,
                 Integer quantidadeEstoque,
                 String categoriaNome,
+                Boolean ativo,
                 LocalDateTime dataCriacao,
-                LocalDateTime dataAtualizacao,
-                Boolean ativo) {
+                LocalDateTime dataAtualizacao) {
 }

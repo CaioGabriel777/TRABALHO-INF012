@@ -1,9 +1,12 @@
 package com.inf012.inventory.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.inf012.inventory.dto.EstoqueDto;
-import com.inf012.inventory.dto.MovimentacaoResponseDto;
+import com.inf012.inventory.dto.movimentacao.MovimentacaoDto;
+import com.inf012.inventory.dto.movimentacao.MovimentacaoResponseDto;
+import com.inf012.inventory.exception.BusinessException;
+import com.inf012.inventory.exception.ResourceNotFoundException;
 import com.inf012.inventory.mapper.MovimentacaoMapper;
 import com.inf012.inventory.model.MovimentacaoEstoque;
 import com.inf012.inventory.model.Produto;
@@ -11,40 +14,41 @@ import com.inf012.inventory.model.TipoMovimentacao;
 import com.inf012.inventory.repository.MovimentacaoEstoqueRepository;
 import com.inf012.inventory.repository.ProdutoRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
-public class EstoqueService {
+public class MovimentacaoEstoqueService {
 
     private final ProdutoRepository produtoRepository;
     private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
     private final MovimentacaoMapper mapper;
 
-    public EstoqueService(ProdutoRepository produtoRepository,
+    public MovimentacaoEstoqueService(ProdutoRepository produtoRepository,
             MovimentacaoEstoqueRepository movimentacaoEstoqueRepository, MovimentacaoMapper mapper) {
         this.produtoRepository = produtoRepository;
         this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
         this.mapper = mapper;
     }
 
-    public MovimentacaoResponseDto registrarMovimentacao(EstoqueDto estoque) {
+    @Transactional
+    public MovimentacaoResponseDto registrarMovimentacao(MovimentacaoDto estoque) {
         Produto produto = produtoRepository.findById(estoque.produtoId())
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-
-        if (estoque.quantidade() <= 0) {
-            throw new RuntimeException("Quantidade deve ser maior que 0");
-        }
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
 
         TipoMovimentacao tipo = TipoMovimentacao.validarMovimentacao(estoque.tipo());
 
         int quantidadeFinal = tipo == TipoMovimentacao.ENTRADA ? produto.getQuantidadeEstoque() + estoque.quantidade()
                 : produto.getQuantidadeEstoque() - estoque.quantidade();
 
-        // se eu remover mais do que eu tenho em estoque
         if (quantidadeFinal < 0) {
-            throw new RuntimeException("Estoque insuficiente");
+            throw new BusinessException(HttpStatus.CONFLICT, "Estoque insuficiente para essa movimentação");
         }
 
+        produto.setQuantidadeEstoque(quantidadeFinal);
+        Produto produtoSalvo = produtoRepository.save(produto);
+
         MovimentacaoEstoque movimentacao = new MovimentacaoEstoque();
-        movimentacao.setProduto(produto);
+        movimentacao.setProduto(produtoSalvo);
         movimentacao.setTipo(tipo);
         movimentacao.setQuantidade(estoque.quantidade());
         movimentacao.setMotivo(estoque.motivo());

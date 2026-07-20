@@ -10,4 +10,10 @@ public interface FornecedorRepository extends JpaRepository<Fornecedor, Long> {
     List<Fornecedor> findByNomeIgnoreCaseContaining(String nome);
 
     boolean existsByNomeIgnoreCase(String nome);
+
+    boolean existsByCnpj(String cnpj);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByTelefone(String telefone);
 }
