@@ -14,6 +14,10 @@ import com.inf012.inventory.mapper.ProdutoMapper;
 import com.inf012.inventory.model.Categoria;
 import com.inf012.inventory.model.Fornecedor;
 import com.inf012.inventory.model.Produto;
+import com.inf012.inventory.rabbitmq.event.ProdutoAtualizadoEvent;
+import com.inf012.inventory.rabbitmq.event.ProdutoCadastradoEvent;
+import com.inf012.inventory.rabbitmq.event.ProdutoRemovidoEvent;
+import com.inf012.inventory.rabbitmq.publisher.EstoqueEventPublisher;
 import com.inf012.inventory.repository.CategoriaRepository;
 import com.inf012.inventory.repository.FornecedorRepository;
 import com.inf012.inventory.repository.ProdutoRepository;
@@ -26,15 +30,18 @@ public class ProdutoService {
     private final CategoriaRepository categoriaRepository;
     private final FornecedorRepository fornecedorRepository;
     private final ProdutoRepository produtoRepository;
+    private final EstoqueEventPublisher estoqueEventPublisher;
     private final ProdutoMapper mapper;
 
     public ProdutoService(CategoriaRepository categoriaRepository,
             FornecedorRepository fornecedorRepository,
             ProdutoRepository produtoRepository,
+            EstoqueEventPublisher estoqueEventPublisher,
             ProdutoMapper mapper) {
         this.categoriaRepository = categoriaRepository;
         this.fornecedorRepository = fornecedorRepository;
         this.produtoRepository = produtoRepository;
+        this.estoqueEventPublisher = estoqueEventPublisher;
         this.mapper = mapper;
     }
 
@@ -63,7 +70,6 @@ public class ProdutoService {
         return mapper.fromEntity(produto);
     }
 
-    // adicionar notificação
     @Transactional
     public ProdutoResponseDto cadastrarProduto(ProdutoDto produto) {
         Categoria categoria = categoriaRepository.findById(produto.categoriaId())
@@ -72,17 +78,26 @@ public class ProdutoService {
         Fornecedor fornecedor = fornecedorRepository.findById(produto.fornecedorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Fornecedor não encontrado"));
 
-        Produto newProduto = mapper.dtoToProduto(produto);
-        newProduto.setCategoria(categoria);
-        newProduto.setFornecedor(fornecedor);
-        newProduto.setAtivo(true);
+        Produto novoProduto = mapper.dtoToProduto(produto);
+        novoProduto.setCategoria(categoria);
+        novoProduto.setFornecedor(fornecedor);
+        novoProduto.setAtivo(true);
 
-        return mapper.fromEntity(produtoRepository.save(newProduto));
+        Produto produtoSalvo = produtoRepository.save(novoProduto);
+
+        try {
+            estoqueEventPublisher
+                    .publicarProdutoCadastrado(
+                            new ProdutoCadastradoEvent(produtoSalvo.getId(), produtoSalvo.getNome()));
+        } catch (Exception e) {
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao publicar evento");
+        }
+
+        return mapper.fromEntity(produtoSalvo);
     }
 
-    // adicionar notificação
     @Transactional
-    public ProdutoResponseDto atualizarProdutor(Long idProduto, ProdutoUpdateDto produto) {
+    public ProdutoResponseDto atualizarProduto(Long idProduto, ProdutoUpdateDto produto) {
 
         Produto produtoExistente = produtoRepository.findById(idProduto)
                 .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
@@ -123,16 +138,35 @@ public class ProdutoService {
             produtoExistente.setAtivo(produto.ativo());
         }
 
-        return mapper.fromEntity(produtoRepository.save(produtoExistente));
-    }
+        Produto produtoSalvo = produtoRepository.save(produtoExistente);
 
-    // adicionar notificação
-    @Transactional
-    public void removerProduto(Long idProduto) {
-        if (!produtoRepository.existsById(idProduto)) {
-            throw new ResourceNotFoundException("Produto não encontrado: " + idProduto);
+        try {
+            estoqueEventPublisher.publicarProdutoAtualizado(new ProdutoAtualizadoEvent(
+                    produtoSalvo.getId(),
+                    produtoSalvo.getNome()));
+        } catch (Exception e) {
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao publicar evento");
         }
 
-        produtoRepository.deleteById(idProduto);
+        return mapper.fromEntity(produtoSalvo);
+    }
+
+    @Transactional
+    public void removerProduto(Long idProduto) {
+        if (idProduto == null || idProduto <= 0) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Id inválido");
+        }
+
+        Produto produto = produtoRepository.findById(idProduto)
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+
+        produtoRepository.delete(produto);
+
+        try {
+            estoqueEventPublisher.publicarProdutoRemovido(
+                    new ProdutoRemovidoEvent(produto.getId(), produto.getNome()));
+        } catch (Exception e) {
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao publicar evento");
+        }
     }
 }

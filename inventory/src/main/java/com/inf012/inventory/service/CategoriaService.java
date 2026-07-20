@@ -2,10 +2,13 @@ package com.inf012.inventory.service;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.inf012.inventory.dto.categoria.CategoriaDto;
 import com.inf012.inventory.dto.categoria.CategoriaResponseDto;
 import com.inf012.inventory.dto.categoria.CategoriaUpdateDto;
+import com.inf012.inventory.exception.BusinessException;
 import com.inf012.inventory.exception.ResourceNotFoundException;
 import com.inf012.inventory.mapper.CategoriaMapper;
 import com.inf012.inventory.model.Categoria;
@@ -44,8 +47,18 @@ public class CategoriaService {
     }
 
     @Transactional
-    public Categoria cadastrar(Categoria categoria) {
-        return categoriaRepository.save(categoria);
+    public CategoriaResponseDto cadastrar(CategoriaDto categoria) {
+        if (categoria.nome() == null || categoria.nome().isBlank()) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Nome da categoria é obrigatório");
+        }
+
+        if (categoriaRepository.existsByNomeIgnoreCase(categoria.nome())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Categoria já existe: " + categoria.nome());
+        }
+
+        Categoria categoriaSalva = categoriaRepository.save(mapper.toEntity(categoria));
+
+        return mapper.fromEntity(categoriaSalva);
     }
 
     @Transactional

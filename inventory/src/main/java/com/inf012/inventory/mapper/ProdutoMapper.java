@@ -2,6 +2,7 @@ package com.inf012.inventory.mapper;
 
 import org.springframework.stereotype.Component;
 
+import com.inf012.inventory.dto.fornecedor.FornecedorResponseDto;
 import com.inf012.inventory.dto.produto.ProdutoDto;
 import com.inf012.inventory.dto.produto.ProdutoResponseDto;
 import com.inf012.inventory.model.Produto;
@@ -30,6 +31,14 @@ public record ProdutoMapper() {
                 produto.getCategoria().getNome(),
                 produto.getAtivo(),
                 produto.getDataCriacao(),
-                produto.getDataAtualizacao());
+                produto.getDataAtualizacao(),
+                new FornecedorResponseDto(
+                        produto.getFornecedor().getId(),
+                        produto.getFornecedor().getNome(),
+                        produto.getFornecedor().getCnpj(),
+                        produto.getFornecedor().getTelefone(),
+                        produto.getFornecedor().getEmail(),
+                        produto.getFornecedor().getDataCriacao(),
+                        produto.getFornecedor().getDataAtualizacao()));
     }
 }

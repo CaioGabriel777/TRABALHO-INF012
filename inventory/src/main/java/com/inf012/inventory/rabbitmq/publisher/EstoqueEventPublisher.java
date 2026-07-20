@@ -4,6 +4,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 import com.inf012.inventory.rabbitmq.event.EstoqueCriticoEvent;
+import com.inf012.inventory.rabbitmq.event.ProdutoAtualizadoEvent;
 import com.inf012.inventory.rabbitmq.event.ProdutoCadastradoEvent;
 import com.inf012.inventory.rabbitmq.event.ProdutoRemovidoEvent;
 
@@ -18,6 +19,10 @@ public class EstoqueEventPublisher {
 
     public void publicarProdutoCadastrado(ProdutoCadastradoEvent event) {
         rabbitTemplate.convertAndSend("estoque.exchange", "produto.cadastrado", event);
+    }
+
+    public void publicarProdutoAtualizado(ProdutoAtualizadoEvent event) {
+        rabbitTemplate.convertAndSend("estoque.exchange", "produto.atualizado", event);
     }
 
     public void publicarProdutoRemovido(ProdutoRemovidoEvent event) {
