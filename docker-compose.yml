@@ -111,5 +111,19 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_INVENTORY_URL: http://localhost:8081
+        REACT_APP_CLIENTE_URL: http://localhost:8082
+        REACT_APP_COMPRAS_URL: http://localhost:8083
+    ports:
+      - "3000:80"
+    depends_on:
+      - inventory
+      - cliente
+      - compras
+
 volumes:
   postgres_data:
