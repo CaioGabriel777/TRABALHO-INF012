@@ -1,0 +1,46 @@
+frontend/
+├── public/
+│   └── index.html
+├── src/
+│   ├── api/
+│   │   ├── axiosConfig.js
+│   │   ├── produtoApi.js
+│   │   ├── categoriaApi.js
+│   │   ├── fornecedorApi.js
+│   │   ├── clienteApi.js
+│   │   └── compraApi.js
+│   │
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── Navbar.jsx
+│   │   │   └── Sidebar.jsx
+│   │   ├── produto/
+│   │   │   ├── ProdutoForm.jsx
+│   │   │   ├── ProdutoList.jsx
+│   │   │   └── ProdutoCard.jsx
+│   │   ├── cliente/
+│   │   │   ├── ClienteForm.jsx
+│   │   │   └── ClienteList.jsx
+│   │   └── compra/
+│   │       ├── CompraForm.jsx
+│   │       └── CompraList.jsx
+│   │
+│   ├── pages/
+│   │   ├── ProdutosPage.jsx
+│   │   ├── CategoriasPage.jsx
+│   │   ├── FornecedoresPage.jsx
+│   │   ├── ClientesPage.jsx
+│   │   └── ComprasPage.jsx
+│   │
+│   ├── hooks/
+│   │   ├── useProdutos.js
+│   │   └── useClientes.js
+│   │
+│   ├── routes/
+│   │   └── AppRoutes.jsx
+│   │
+│   ├── App.jsx
+│   └── index.js
+│
+├── package.json
+└── .env
