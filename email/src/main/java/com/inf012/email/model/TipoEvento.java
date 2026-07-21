@@ -1,0 +1,5 @@
+package com.inf012.email.model;
+
+public enum TipoEvento {
+    COMPRA_REALIZADA, PRODUTO_CADASTRADO, PRODUTO_ATUALIZADO, PRODUTO_REMOVIDO, ESTOQUE_CRITICO
+}
