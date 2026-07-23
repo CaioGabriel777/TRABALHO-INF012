@@ -48,6 +48,16 @@ public class CompraController {
         return ResponseEntity.status(HttpStatus.CREATED).body(compraService.registrarCompra(compra));
     }
 
+    @PutMapping("/{id}/confirmar")
+    public ResponseEntity<CompraResponseDto> confirmar(@PathVariable Long id) {
+        return ResponseEntity.ok(compraService.confirmar(id));
+    }
+
+    @PutMapping("/{id}/concluir")
+    public ResponseEntity<CompraResponseDto> concluir(@PathVariable Long id) {
+        return ResponseEntity.ok(compraService.concluir(id));
+    }
+
     @PutMapping("/{id}/cancelar")
     public ResponseEntity<CompraResponseDto> cancelar(@PathVariable Long id) {
         return ResponseEntity.ok(compraService.cancelar(id));

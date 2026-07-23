@@ -12,5 +12,11 @@ export const historicoPorCliente = (clienteId) =>
 export const registrarCompra = (dados) =>
   comprasApi.post("/compras", dados).then((r) => r.data);
 
+export const confirmarCompra = (id) =>
+  comprasApi.put(`/compras/${id}/confirmar`).then((r) => r.data);
+
+export const concluirCompra = (id) =>
+  comprasApi.put(`/compras/${id}/concluir`).then((r) => r.data);
+
 export const cancelarCompra = (id) =>
   comprasApi.put(`/compras/${id}/cancelar`).then((r) => r.data);

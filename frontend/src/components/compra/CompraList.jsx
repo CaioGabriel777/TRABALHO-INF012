@@ -15,10 +15,52 @@ const entregaLabel = {
   ENTREGA_DOMICILIO: "Entrega em domicílio",
 };
 
-export default function CompraList({ compras, clientesPorId, onCancelar }) {
+export default function CompraList({ compras, clientesPorId, onConfirmar, onConcluir, onCancelar }) {
   if (compras.length === 0) {
     return <div className="empty">Nenhuma compra registrada.</div>;
   }
+
+  const renderAcoes = (c) => {
+    if (c.status === "PENDENTE") {
+      return (
+        <>
+          <button
+            className="btn btn-sm"
+            onClick={() => onConfirmar(c)}
+          >
+            Confirmar
+          </button>
+          <button
+            className="btn btn-danger btn-sm"
+            style={{ marginLeft: 6 }}
+            onClick={() => onCancelar(c)}
+          >
+            Cancelar
+          </button>
+        </>
+      );
+    }
+    if (c.status === "CONFIRMADA") {
+      return (
+        <>
+          <button
+            className="btn btn-sm"
+            onClick={() => onConcluir(c)}
+          >
+            Concluir
+          </button>
+          <button
+            className="btn btn-danger btn-sm"
+            style={{ marginLeft: 6 }}
+            onClick={() => onCancelar(c)}
+          >
+            Cancelar
+          </button>
+        </>
+      );
+    }
+    return <span className="muted">—</span>;
+  };
 
   return (
     <div className="card">
@@ -32,7 +74,7 @@ export default function CompraList({ compras, clientesPorId, onCancelar }) {
             <th>Itens</th>
             <th>Total</th>
             <th>Data</th>
-            <th style={{ width: 110 }}>Ações</th>
+            <th style={{ width: 180 }}>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -49,18 +91,7 @@ export default function CompraList({ compras, clientesPorId, onCancelar }) {
               <td>{c.itens?.length || 0}</td>
               <td>{moeda(c.valorTotal)}</td>
               <td>{data(c.dataCriacao)}</td>
-              <td>
-                {c.status !== "CANCELADA" && c.status !== "CONCLUIDA" ? (
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => onCancelar(c)}
-                  >
-                    Cancelar
-                  </button>
-                ) : (
-                  <span className="muted">—</span>
-                )}
-              </td>
+              <td>{renderAcoes(c)}</td>
             </tr>
           ))}
         </tbody>
