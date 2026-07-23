@@ -3,6 +3,8 @@ import {
   listarCompras,
   registrarCompra,
   cancelarCompra,
+  confirmarCompra,
+  concluirCompra,
 } from "../api/compraApi";
 import { listarClientes } from "../api/clienteApi";
 import { listarProdutos } from "../api/produtoApi";
@@ -40,7 +42,6 @@ export default function ComprasPage() {
     carregar();
   }, [carregar]);
 
-  // mapa id -> nome para exibir o cliente na tabela
   const clientesPorId = clientes.reduce((acc, c) => {
     acc[c.id] = c.nome;
     return acc;
@@ -50,6 +51,26 @@ export default function ComprasPage() {
     await registrarCompra(dados);
     setMostrarForm(false);
     carregar();
+  };
+
+  const confirmar = async (compra) => {
+    if (!window.confirm(`Confirmar a compra #${compra.id}?`)) return;
+    try {
+      await confirmarCompra(compra.id);
+      carregar();
+    } catch (err) {
+      setErro(err.message);
+    }
+  };
+
+  const concluir = async (compra) => {
+    if (!window.confirm(`Concluir a compra #${compra.id}?`)) return;
+    try {
+      await concluirCompra(compra.id);
+      carregar();
+    } catch (err) {
+      setErro(err.message);
+    }
   };
 
   const cancelar = async (compra) => {
@@ -88,6 +109,8 @@ export default function ComprasPage() {
         <CompraList
           compras={compras}
           clientesPorId={clientesPorId}
+          onConfirmar={confirmar}
+          onConcluir={concluir}
           onCancelar={cancelar}
         />
       )}

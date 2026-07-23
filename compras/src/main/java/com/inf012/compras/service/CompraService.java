@@ -97,9 +97,41 @@ public class CompraService {
     }
 
     @Transactional
+    public CompraResponseDto confirmar(Long id) {
+        Compra compra = compraRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Compra não encontrada: " + id));
+
+        if (compra.getStatus() != StatusCompra.PENDENTE) {
+            throw new BusinessException("Apenas compras PENDENTES podem ser confirmadas");
+        }
+
+        compra.setStatus(StatusCompra.CONFIRMADA);
+
+        return mapper.fromEntity(compraRepository.save(compra));
+    }
+
+    @Transactional
+    public CompraResponseDto concluir(Long id) {
+        Compra compra = compraRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Compra não encontrada: " + id));
+
+        if (compra.getStatus() != StatusCompra.CONFIRMADA) {
+            throw new BusinessException("Apenas compras CONFIRMADAS podem ser concluídas");
+        }
+
+        compra.setStatus(StatusCompra.CONCLUIDA);
+
+        return mapper.fromEntity(compraRepository.save(compra));
+    }
+
+    @Transactional
     public CompraResponseDto cancelar(Long id) {
         Compra compra = compraRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Compra não encontrada: " + id));
+
+        if (compra.getStatus() == StatusCompra.CONCLUIDA) {
+            throw new BusinessException("Compras concluídas não podem ser canceladas");
+        }
 
         compra.setStatus(StatusCompra.CANCELADA);
 
