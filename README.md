@@ -1,7 +1,7 @@
 # TRABALHO-INF012 — Sistema de Gestão de Estoque com Microsserviços
 
 <p align="center">
-  <img src="frontend/public/produtos.png" alt="Tela de Produtos" width="800" />
+  <img src="frontend/public/dashboard.png" alt="Tela de dashboard" width="800" />
 </p>
 
 Sistema desenvolvido para a disciplina **INF012 — Programação para Web** do IFBA, implementado com arquitetura de microsserviços em Spring Boot e frontend React.JS.
@@ -24,9 +24,9 @@ Frontend (React)
     ├── REST ──► inventory  ──► [RabbitMQ: estoque.exchange]
     │                                    │
     ├── REST ──► cliente                 │
-    │               ▲                   │
-    └── REST ──► compras                │
-                    │                   ▼
+    │               ▲                    │
+    └── REST ──► compras                 │
+                    │                    ▼
                     │ OpenFeign   [RabbitMQ: compra.exchange]
                     │                   │
                     └────────────────► email ──► MailHog (SMTP)
@@ -70,7 +70,7 @@ PENDENTE ──► CONFIRMADA ──► CONCLUIDA
 - **Spring AMQP** (RabbitMQ)
 - **OpenFeign** (comunicação síncrona entre `compras` e `cliente`)
 - **Springdoc OpenAPI** (Swagger UI em cada serviço)
-- **React** (frontend)
+- **React** + **Recharts** (frontend e dashboard analítico)
 - **Docker** + **Docker Compose**
 
 ---

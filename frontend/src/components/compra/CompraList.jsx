@@ -23,40 +23,34 @@ export default function CompraList({ compras, clientesPorId, onConfirmar, onConc
   const renderAcoes = (c) => {
     if (c.status === "PENDENTE") {
       return (
-        <>
-          <button
-            className="btn btn-sm"
-            onClick={() => onConfirmar(c)}
-          >
-            Confirmar
-          </button>
-          <button
-            className="btn btn-danger btn-sm"
-            style={{ marginLeft: 6 }}
-            onClick={() => onCancelar(c)}
-          >
-            Cancelar
-          </button>
-        </>
+        <select
+          className="action-select"
+          value=""
+          onChange={(e) => {
+            if (e.target.value === "confirmar") onConfirmar(c);
+            if (e.target.value === "cancelar") onCancelar(c);
+          }}
+        >
+          <option value="" disabled>Opções...</option>
+          <option value="confirmar">Confirmar</option>
+          <option value="cancelar">Cancelar</option>
+        </select>
       );
     }
     if (c.status === "CONFIRMADA") {
       return (
-        <>
-          <button
-            className="btn btn-sm"
-            onClick={() => onConcluir(c)}
-          >
-            Concluir
-          </button>
-          <button
-            className="btn btn-danger btn-sm"
-            style={{ marginLeft: 6 }}
-            onClick={() => onCancelar(c)}
-          >
-            Cancelar
-          </button>
-        </>
+        <select
+          className="action-select"
+          value=""
+          onChange={(e) => {
+            if (e.target.value === "concluir") onConcluir(c);
+            if (e.target.value === "cancelar") onCancelar(c);
+          }}
+        >
+          <option value="" disabled>Opções...</option>
+          <option value="concluir">Concluir</option>
+          <option value="cancelar">Cancelar</option>
+        </select>
       );
     }
     return <span className="muted">—</span>;

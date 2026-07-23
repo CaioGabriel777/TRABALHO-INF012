@@ -17,14 +17,19 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "inf012-secret-cookie"
     ports:
       - "5672:5672"
       - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
-      interval: 5s
-      timeout: 5s
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 10s
       retries: 10
+      start_period: 30s
 
   mailhog:
     image: mailhog/mailhog
@@ -127,3 +132,4 @@ services:
 
 volumes:
   postgres_data:
+  rabbitmq_data:
